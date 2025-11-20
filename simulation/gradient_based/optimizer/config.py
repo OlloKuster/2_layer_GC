@@ -1,0 +1,16 @@
+from dataclasses import dataclass
+import nlopt
+
+@dataclass
+class ConfigOptax:
+    num_steps = 30
+    learning_rate = 1.0
+@dataclass
+class ConfigNlopt:
+    MAXEVAL = 150
+    FTOL_ABS = 1e-4
+    FTOL_REL = 1e-5
+    UPPER_BOUNDS = 1
+    LOWER_BOUNDS = 0
+    OPTIMISER = nlopt.LD_MMA
+    i = 0
