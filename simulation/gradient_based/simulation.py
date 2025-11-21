@@ -5,18 +5,23 @@ import autograd.numpy as anp
 
 from simulation.gradient_based.config import ConfigSim
 from simulation.gradient_based.sources_and_monitors import Sources, Monitors
-from util.projections import tanh_filter_ag_f, ssp_proj_ag_f
+from util.projections import tanh_filter_ag_f, ssp_proj_ag_f, double_staircase_f
 from util.structure_pillars import generate_pillars
 
 
-def simulation(weights, beta):
+def simulation(weights, positions, beta):
+    filter = double_staircase_f(ConfigSim.shallow_etch, ConfigSim.no_etch, beta)
+    gratings = []
+    w = ConfigSim.size_pillars
+    for h, (x, y) in zip(weights, positions):
+        etch_depth = filter(h)
+        grating = td.Box(
+            center=(x, y, -ConfigSim.lz / 2 + ConfigSim.thickness_substrate + ConfigSim.thickness_box + etch_depth/2),
+            size=(w, w, etch_depth)
+        )
+        gratings.append(grating)
 
-    rho = generate_pillars(weights, ConfigSim.nz * ConfigSim.shallow_etch // ConfigSim.no_etch, ConfigSim.nz + 1)    # rho = anp.repeat(weights[:, :, anp.newaxis], ConfigSim.nz, axis=2)
-    # rho = anp.concatenate((rho, anp.flip(rho, axis=1)), axis=1)
-    # rho = weights
-    filter = tanh_filter_ag_f(alpha=0.5, beta=beta)
-    rho_filt = filter(rho)
-    eps = rescale(rho_filt, ConfigSim.eps_SiO2, ConfigSim.eps_Si)
+    struct = td.Structure(geometry=td.GeometryGroup(geometries=gratings), medium=td.Medium(permittivity=ConfigSim.eps_Si))
     substrate = td.Structure(
         geometry=td.Box(center=(0,
                                 0,
@@ -30,23 +35,21 @@ def simulation(weights, beta):
                         size=(ConfigSim.wg_length + 1, ConfigSim.wg_width, ConfigSim.wg_height)),
         medium=td.Medium(permittivity=ConfigSim.eps_Si)
     )
-
-    custom_structure = td.Structure.from_permittivity_array(
-        geometry=td.Box(center=(ConfigSim.lx / 2 - ConfigSim.wg_length - ConfigSim.rho_size[0] / 2,
-                                ConfigSim.rho_size[1] / 4,
-                                -ConfigSim.lz / 2 + ConfigSim.thickness_substrate + ConfigSim.thickness_box + ConfigSim.rho_size[2]/2),
-                        size=(ConfigSim.rho_size[0], ConfigSim.rho_size[1] / 2, ConfigSim.rho_size[2])),
-        eps_data=eps
+    refine_box = td.MeshOverrideStructure(
+        geometry=td.Box(center=(-w/2, ConfigSim.rho_size[1]/4 - w / 4, -ConfigSim.lz / 2 + ConfigSim.thickness_substrate + ConfigSim.thickness_box + ConfigSim.wg_height / 2),
+                        size=(ConfigSim.rho_size[0]+0.2, ConfigSim.rho_size[1]/2+0.2, ConfigSim.rho_size[2]+ConfigSim.dl)),
+        dl=[None, None, ConfigSim.dl]
     )
     grid_spec = td.GridSpec.auto(
         wavelength=ConfigSim.wavelength,
-        min_steps_per_wvl=ConfigSim.min_p_wvl
+        min_steps_per_wvl=ConfigSim.min_p_wvl,
+        override_structures=[refine_box]
     )
 
     sim = td.Simulation(
         size=[ConfigSim.lx, ConfigSim.ly, ConfigSim.lz],
         grid_spec=grid_spec,
-        structures=[substrate, waveguide, custom_structure],
+        structures=[substrate, waveguide, struct],
         sources=[Sources.source],
         monitors=[Monitors.fom_monitor, Monitors.field_monitor_xz,
                   Monitors.field_monitor_xy, Monitors.eps_monitor_xz, Monitors.eps_monitor_xy],

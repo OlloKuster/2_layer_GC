@@ -5,15 +5,16 @@ import autograd.numpy as anp
 
 from simulation.gradient_based.config import ConfigSim
 from simulation.gradient_based.simulation import simulation
+from util.structure_pillars import get_positions
 
 
 def test():
-    weights = np.ones((ConfigSim.nx, ConfigSim.ny, 2))
-    weights[..., 0] = 1
-    weights[..., 1] = 0.1
-    weights = np.random.rand(ConfigSim.nx, ConfigSim.ny, 2)
-    print(weights)
-    sim = simulation(weights, 256)
+    weights = np.ones((ConfigSim.nx, ConfigSim.ny))
+    # weights[..., 0] = 1
+    # weights[..., 1] = 0.1
+    weights = np.random.uniform(0, 1, (ConfigSim.nx*ConfigSim.ny))
+    positions = get_positions((ConfigSim.rho_size[0], ConfigSim.rho_size[1]), ConfigSim.size_pillars, ConfigSim.nx,  ConfigSim.ny)
+    sim = simulation(weights, positions, 1e3)
 
     sim.plot_eps(z=ConfigSim.mon_pos_z, freq=ConfigSim.freq0)
     plt.show()

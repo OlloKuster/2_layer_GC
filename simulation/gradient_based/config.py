@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from tidy3d import C_0
+import numpy as np
 
 @dataclass
 class ConfigSim:
@@ -33,8 +34,11 @@ class ConfigSim:
     eps_SiO2 = 1.44**2
 
     min_p_wvl = 10
+    dl = 0.025
     run_time = 5 / fwidth
 
-    nx = 60
-    ny = 30
+    size_pillars = 0.3
+
+    nx = int(np.ceil(rho_size[0] // size_pillars))
+    ny = int(np.ceil(rho_size[1] // size_pillars / 2))
     nz = 100

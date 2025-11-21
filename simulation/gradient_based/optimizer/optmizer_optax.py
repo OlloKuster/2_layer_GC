@@ -8,7 +8,7 @@ import nlopt
 from simulation.gradient_based.optimizer.config import ConfigOptax
 
 
-def optimizer(weights, objective):
+def optimizer(weights, positions, objective_f):
     weights = np.array(weights)
     optimizer = optax.adam(learning_rate=ConfigOptax.learning_rate)
     opt_state = optimizer.init(weights)
@@ -23,7 +23,8 @@ def optimizer(weights, objective):
 
             if len(betas) > 1 and betas[0] == 1:
                 beta = beta + i * 1
-            value, gradient = autograd.value_and_grad(objective)(weights, step_num=i, beta=beta)
+            objective = objective_f(positions=positions, step_num=i, beta=beta)
+            value, gradient = autograd.value_and_grad(objective)(weights)
 
             print(f"step = {i + 1}")
             print(f"\tbeta = {beta:.4e}")
@@ -36,11 +37,12 @@ def optimizer(weights, objective):
             anp.clip(weights, 0.0, 1.0, out=weights)
 
             loss_hist.append(value)
+            plt.plot(loss_hist)
+            plt.savefig("plots/loss.png")
+            plt.close()
             # rho_hist.append(rho)
 
-    plt.plot(loss_hist)
-    plt.savefig("plots/loss.png")
-    plt.close()
+
 
     with h5py.File(
             f"plots/data.h5",

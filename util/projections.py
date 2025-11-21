@@ -7,7 +7,25 @@ def sigmoid(x):
 
 def double_staircase_f(h_1, h_2, beta):
     def double_staircase(x):
-        return h_1 * sigmoid(beta * (x - h_1 / 2)) + (1 - h_1) * sigmoid(beta * (x - (h_2 + h_1) / 2))
+        # return h_1 * sigmoid(beta * (x - h_1 / 2)) + (h_2 - h_1) * sigmoid(beta * (x - (h_2 + h_1) / 2))
+        return h_1 * f2bin(x, 1/3) + (h_2 - h_1) * f2bin(x, 2/3)
+
+    def f2bin(rho_0, alpha):
+        """
+        Binarises the values of x with parameters alpha and beta.
+        :param rho_0: Array which will be binarised.
+        :param alpha: Steepness of the binarisation function.
+        :param beta: Origin of the binarisation function.
+        :return: Binarised array of x.
+        """
+        if beta == anp.inf:
+            return anp.where(rho_0 > alpha, 1.0, 0.0)
+        else:
+            num = anp.tanh(alpha * beta) + anp.tanh(beta * (rho_0 - alpha))
+            denom = anp.tanh(alpha * beta) + anp.tanh(beta * (1 - alpha))
+            proj = num / denom
+            return proj
+
 
     return double_staircase
 

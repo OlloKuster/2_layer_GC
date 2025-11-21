@@ -68,3 +68,14 @@ def generate_pillars_fill(matrix, nz, height_1, height_2, beta):
             rho[i_x, i_y,
             0:int(projection(matrix[i_x, i_y])._value)] = 1
     return rho
+
+
+def get_positions(rho_size, spacing, nx, ny):
+    coord_x = np.arange(-rho_size[0] / 2, rho_size[0] / 2, spacing)
+    coord_y = np.arange(0, rho_size[1] / 2, spacing)
+
+    x, y = np.meshgrid(coord_x[:nx], coord_y[:ny])
+
+    points = np.vstack((x.flat, y.flat)).T
+
+    return points

@@ -9,7 +9,7 @@ import h5py
 from simulation.gradient_based.optimizer.config import ConfigNlopt as config
 
 
-def optimizer(weights, objective, beta):
+def optimizer(weights, positions, objective_f, beta):
     """
     The optimiser function
     :return:
@@ -19,7 +19,8 @@ def optimizer(weights, objective, beta):
     def f(x, g):
         start = time.time()
         x = anp.reshape(x, weights.shape)
-        value, grad = autograd.value_and_grad(objective)(x, step_num=config.i, beta=beta)
+        objective = objective_f(positions=positions, step_num=config.i, beta=beta)
+        value, grad = autograd.value_and_grad(objective)(x)
         value = float(value)  # Requires np float and not jax.numpy float
         print(value)
         print(f"\tgrad_norm = {np.linalg.norm(grad):.4e}")

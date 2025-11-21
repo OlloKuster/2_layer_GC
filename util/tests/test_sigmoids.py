@@ -6,15 +6,13 @@ from util.projections import double_staircase_f
 
 
 def test():
-    x = np.linspace(0, 1, 100)
-    double_staircase = double_staircase_f(0.07, 0.22, 100)
+    x = np.linspace(0, 1, 1000)
+    double_staircase = double_staircase_f(0.07, 0.22, np.inf)
 
     df = grad(double_staircase)
     grads = [df(xs) for xs in x]
-
     plt.plot(x, double_staircase(x))
-    print(double_staircase(0.07))
-    # plt.plot(x, grads)
+    plt.plot(x, grads)
     plt.grid()
     plt.show()
 

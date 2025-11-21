@@ -7,7 +7,7 @@ class ConfigOptax:
     learning_rate = 1.0
 @dataclass
 class ConfigNlopt:
-    MAXEVAL = 150
+    MAXEVAL = 50
     FTOL_ABS = 1e-4
     FTOL_REL = 1e-5
     UPPER_BOUNDS = 1
