@@ -5,6 +5,7 @@ import nlopt
 import time
 import matplotlib.pyplot as plt
 import h5py
+import cmcrameri.cm as cmc
 
 from simulation.gradient_based.optimizer.config import ConfigNlopt as config
 
@@ -18,7 +19,13 @@ def optimizer(weights, positions, objective_f, beta):
 
     def f(x, g):
         start = time.time()
-        x = anp.reshape(x, weights.shape)
+        # x = anp.reshape(x, weights.shape)
+        plt.imshow(weights.reshape(weights.shape[0], weights.shape[1]).T, origin='lower', cmap=cmc.oslo, vmin=0, vmax=1)
+        plt.savefig(f"plots/weights_{config.i:03}.png")
+        plt.close()
+        plt.plot(loss_hist)
+        plt.savefig(f"plots/loss.png")
+        plt.close()
         objective = objective_f(positions=positions, step_num=config.i, beta=beta)
         value, grad = autograd.value_and_grad(objective)(x)
         value = float(value)  # Requires np float and not jax.numpy float

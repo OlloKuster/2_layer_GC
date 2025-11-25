@@ -33,11 +33,11 @@ class ConfigSim:
     eps_Si = 3.48**2
     eps_SiO2 = 1.44**2
 
-    min_p_wvl = 10
+    min_p_wvl = 7
     dl = 0.025
-    run_time = 5 / fwidth
+    run_time = 10 / fwidth
 
-    size_pillars = 0.3
+    size_pillars = 0.5
 
     nx = int(np.ceil(rho_size[0] // size_pillars))
     ny = int(np.ceil(rho_size[1] // size_pillars / 2))

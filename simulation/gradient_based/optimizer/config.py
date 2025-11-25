@@ -3,8 +3,8 @@ import nlopt
 
 @dataclass
 class ConfigOptax:
-    num_steps = 30
-    learning_rate = 1.0
+    num_steps = 20
+    learning_rate = 1.
 @dataclass
 class ConfigNlopt:
     MAXEVAL = 50
